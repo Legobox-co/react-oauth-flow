@@ -48,23 +48,36 @@ class OauthReceiver extends React.Component {
         throw err;
       }
 
-      const url = buildURL(`${tokenUrl}`, {
+      // const url = buildURL(`${tokenUrl}`, {
+      //   code,
+      //   grant_type: 'authorization_code',
+      //   client_id: clientId,
+      //   client_secret: clientSecret,
+      //   redirect_uri: redirectUri,
+      //   ...args,
+      // });
+      const url = `${tokenUrl}`;
+      const data = {
         code,
         grant_type: 'authorization_code',
         client_id: clientId,
         client_secret: clientSecret,
         redirect_uri: redirectUri,
-        ...args,
-      });
+      };
 
-      const headers = new Headers({ 'Content-Type': 'application/json' });
-      const defaultFetchArgs = { method: 'POST', headers };
+      const headers = { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+       };
+      const defaultFetchArgs = { method: 'POST', headers, body: data };
       const fetchArgs = Object.assign(defaultFetchArgs, tokenFetchArgs);
 
+      console.log(fetchArgs);
       (typeof tokenFn === 'function' ?
         tokenFn(url, fetchArgs) :
         fetch2(url, fetchArgs)
       ).then(response => {
+          console.log(response)
           const accessToken = response.access_token;
 
           if (typeof onAuthSuccess === 'function') {
@@ -74,6 +87,7 @@ class OauthReceiver extends React.Component {
           this.setState(() => ({ processing: false }));
         })
         .catch(err => {
+          console.log(err)
           this.handleError(err);
           this.setState(() => ({ processing: false }));
         });
